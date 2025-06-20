@@ -21,8 +21,7 @@ function App({ isElectron = false }: AppProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentView, setCurrentView] = useState('dashboard');
 
-  useEffect(() => {
-    // Configuración específica para Electron
+  // Configuración específica para Electron
   useEffect(() => {
     if (isElectron) {
       console.log('Ejecutando en entorno Electron');
@@ -31,6 +30,7 @@ function App({ isElectron = false }: AppProps) {
   }, [isElectron]);
 
   // Load settings and tasks from localStorage
+  useEffect(() => {
     const savedSettings = storage.getSettings();
     const savedTasks = storage.getTasks();
     

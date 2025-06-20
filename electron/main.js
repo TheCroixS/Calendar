@@ -47,6 +47,11 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
+  // Mostrar la ventana cuando esté lista
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+  })
+
   // Manejar el cierre de la aplicación
   mainWindow.on('closed', function () {
     mainWindow = null
@@ -73,23 +78,28 @@ app.whenReady().then(() => {
 })
 
 // Salir cuando todas las ventanas estén cerradas
-autoUpdater.checkForUpdatesAndNotify()
-
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
 // Auto Updater
-const { autoUpdater } = require('electron-updater')
-
 autoUpdater.on('update-available', () => {
-  mainWindow.webContents.send('update_available');
+  if (mainWindow) {
+    mainWindow.webContents.send('update_available');
+  }
 });
 
 autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update_downloaded');
+  if (mainWindow) {
+    mainWindow.webContents.send('update_downloaded');
+  }
 });
 
 ipcMain.on('restart_app', () => {
   autoUpdater.quitAndInstall();
 });
+
+// Verificar actualizaciones al iniciar
+app.whenReady().then(() => {
+  autoUpdater.checkForUpdatesAndNotify()
+})

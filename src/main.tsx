@@ -3,17 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Configuración para Electron
-if (window.electron) {
-  // Configurar el protocolo de archivo para cargar recursos locales
-  const { protocol } = window.electron;
-  protocol.registerSchemesAsPrivileged([
-    { scheme: 'app', privileges: { secure: true, standard: true } }
-  ]);
-}
-
 // Verificar si estamos en un entorno de Electron
-const isElectron = window.electron && window.electron.isElectron === true;
+const isElectron = !!(window as any).electron && (window as any).electron.isElectron === true;
 
 // Función para cargar la aplicación
 const loadApp = () => {
@@ -27,15 +18,17 @@ const loadApp = () => {
 // Iniciar la aplicación
 loadApp();
 
-// Manejar actualizaciones de la aplicación
-if (window.electron) {
-  window.electron.ipcRenderer.on('update_available', () => {
+// Manejar actualizaciones de la aplicación (solo en Electron)
+if (isElectron && (window as any).electron) {
+  const { ipcRenderer } = (window as any).electron;
+  
+  ipcRenderer.on('update_available', () => {
     console.log('Nueva actualización disponible. Descargando...');
   });
 
-  window.electron.ipcRenderer.on('update_downloaded', () => {
+  ipcRenderer.on('update_downloaded', () => {
     if (confirm('¡Nueva actualización lista! ¿Deseas reiniciar la aplicación ahora?')) {
-      window.electron.ipcRenderer.send('restart_app');
+      ipcRenderer.send('restart_app');
     }
   });
 }
